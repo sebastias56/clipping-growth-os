@@ -2,7 +2,7 @@
 
 Clipping Growth OS is an incremental, production-oriented platform for turning long-form creator content into reviewable short-form clips.
 
-The repository currently contains the Stage 0 repository foundation and a Spring Boot backend skeleton. Media processing, persistence, domain features, frontend code, infrastructure, and distribution are intentionally out of scope at this stage.
+The repository currently contains the Stage 0 repository foundation and PostgreSQL persistence infrastructure. Product domain features, media processing, frontend code, distribution, and analytics are intentionally out of scope at this stage.
 
 ## Repository structure
 
@@ -14,7 +14,21 @@ clipping-growth-os/
 ## Backend prerequisites
 
 - Java 25
+- PostgreSQL 18 for normal application startup
+- A Docker-compatible container runtime for integration tests
 - No system Maven installation is required; use the included Maven Wrapper.
+
+## Database configuration
+
+The backend reads its PostgreSQL connection from Spring Boot's normal environment-backed configuration:
+
+- `DB_URL` (local default: `jdbc:postgresql://localhost:5432/clipping_growth`)
+- `DB_USERNAME` (local default: `clipping_growth`)
+- `DB_PASSWORD` (local default: `clipping_growth`)
+
+The root `.env.example` documents these values. Spring Boot does not load that file automatically; export the variables in your shell or configure them through your development environment.
+
+Flyway owns schema evolution. Hibernate schema generation is disabled because the project does not have mapped domain entities yet.
 
 ## Build and test
 
@@ -27,6 +41,8 @@ From `backend/`:
 
 On macOS or Linux, use `./mvnw` instead.
 
+The tests start an isolated PostgreSQL 18 container and do not use a developer-installed PostgreSQL instance.
+
 ## Run locally
 
 From `backend/`:
@@ -34,6 +50,8 @@ From `backend/`:
 ```powershell
 .\mvnw.cmd spring-boot:run
 ```
+
+The configured PostgreSQL database must be available before starting the application. Docker Compose is intentionally not part of this stage.
 
 The standard Actuator health endpoint is then available at:
 
