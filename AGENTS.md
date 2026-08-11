@@ -4,7 +4,7 @@
 
 Clipping Growth OS will eventually turn long-form creator content into short-form clips through transcription, moment detection, clip generation, subtitles, variants, human review, and export. The MVP stops at human review and export; automatic publishing, analytics, experiments, and multi-account SaaS capabilities are later work.
 
-Build incrementally. Implement only the explicitly requested stage and do not scaffold future features. The current repository contains only the Stage 0 foundation and Spring Boot backend skeleton.
+Build incrementally. Implement only the explicitly requested stage and do not scaffold future features. The current repository contains the Stage 0 foundation and PostgreSQL persistence infrastructure, but no business/domain model.
 
 ## Architectural boundaries
 
@@ -36,3 +36,12 @@ Build incrementally. Implement only the explicitly requested stage and do not sc
 - Use the Maven Wrapper (`mvnw` or `mvnw.cmd`) for commands.
 - Run tests from `backend/` with `./mvnw test` (or `.\mvnw.cmd test` on Windows).
 - Package with `./mvnw package` (or `.\mvnw.cmd package` on Windows).
+
+## Persistence foundation
+
+- PostgreSQL 18 is the target database.
+- Runtime connection settings come from `DB_URL`, `DB_USERNAME`, and `DB_PASSWORD` through Spring Boot configuration.
+- Flyway exclusively owns schema evolution; Hibernate schema generation must remain disabled.
+- Do not create JPA entities or repositories until an explicit domain stage requires them.
+- Persistence integration tests use a PostgreSQL 18 Testcontainer and must not fall back to H2, mocks, or a locally installed database.
+- Normal application startup requires an externally available PostgreSQL database; Docker Compose is not part of the current stage.
