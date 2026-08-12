@@ -114,12 +114,6 @@ Verify the worker at:
 GET http://localhost:8001/health
 ```
 
-Run the worker tests with:
-
-```powershell
-uv run --locked pytest
-```
-
 ## Frontend
 
 Prerequisites:
@@ -140,23 +134,34 @@ The frontend is available at:
 http://localhost:5173/
 ```
 
-Run the frontend checks with:
+## Quality checks
 
-```powershell
-npm run typecheck
-npm test
-npm run build
-```
-
-## Build and test
-
-From `backend/`:
+From `backend/`, the Maven Enforcer validates Java and Maven before the tests run:
 
 ```powershell
 .\mvnw.cmd clean test
 .\mvnw.cmd package
 ```
 
-On macOS or Linux, use `./mvnw` instead.
+From `workers/media-worker/`:
+
+```powershell
+uv sync --locked
+uv run --locked ruff check .
+uv run --locked ruff format --check .
+uv run --locked pytest
+```
+
+From `frontend/`:
+
+```powershell
+npm ci
+npm run lint
+npm run typecheck
+npm test
+npm run build
+```
+
+On macOS or Linux, use `./mvnw` for the backend commands.
 
 The tests start an isolated PostgreSQL 18 container and do not use a developer-installed PostgreSQL instance.
