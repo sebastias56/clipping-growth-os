@@ -1,0 +1,18 @@
+[project]
+name = "media-worker"
+version = "0.1.0"
+description = "Media processing service for Clipping Growth OS"
+requires-python = "==3.14.*"
+dependencies = [
+    "fastapi>=0.116.0",
+    "uvicorn>=0.35.0",
+]
+
+[dependency-groups]
+dev = [
+    "httpx2>=2.10.0",
+    "pytest>=8.4.1",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
