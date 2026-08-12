@@ -44,4 +44,4 @@ Build incrementally. Implement only the explicitly requested stage and do not sc
 - Flyway exclusively owns schema evolution; Hibernate schema generation must remain disabled.
 - Do not create JPA entities or repositories until an explicit domain stage requires them.
 - Persistence integration tests use a PostgreSQL 18 Testcontainer and must not fall back to H2, mocks, or a locally installed database.
-- Normal application startup requires an externally available PostgreSQL database; Docker Compose is not part of the current stage.
+- The root `compose.yaml` provides PostgreSQL 18 only for local development; run the backend directly from Maven or the IDE unless containerization is explicitly requested.
