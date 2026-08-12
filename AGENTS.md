@@ -28,6 +28,13 @@ Build incrementally. Implement only the explicitly requested stage and do not sc
 - Review the final diff for accidental or unnecessary changes.
 - Do not create commits unless the user explicitly asks.
 
+## Quality baseline
+
+- Keep the Maven Enforcer Java and Maven requirements aligned with the documented backend runtime and Maven Wrapper.
+- Use the media worker's locked Ruff configuration for linting and formatting, and pytest for tests. API boundary tests should cover FastAPI endpoints; future media-processing tests should prefer deterministic fixtures.
+- Use ESLint's flat configuration for frontend linting and Vitest with Testing Library for tests. Test user-visible behavior and contracts, and mock HTTP boundaries rather than internal implementation details.
+- Do not introduce coverage thresholds or require snapshot testing without a concrete need.
+
 ## Backend
 
 - Location: `backend/`
