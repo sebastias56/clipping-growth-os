@@ -1,6 +1,11 @@
 # Maven build output
 **/target/
 
+# Frontend generated artifacts
+node_modules/
+dist/
+coverage/
+
 # Python generated artifacts
 .venv/
 __pycache__/

@@ -2,13 +2,14 @@
 
 Clipping Growth OS is an incremental, production-oriented platform for turning long-form creator content into reviewable short-form clips.
 
-The repository currently contains the Stage 0 repository foundation, PostgreSQL persistence infrastructure, a local PostgreSQL development environment, and the independent media worker foundation. Product domain features, media processing, frontend code, distribution, and analytics are intentionally out of scope at this stage.
+The repository currently contains the Stage 0 repository foundation, PostgreSQL persistence infrastructure, a local PostgreSQL development environment, the independent media worker foundation, and the frontend application foundation. Product domain features, media processing, distribution, and analytics are intentionally out of scope at this stage.
 
 ## Repository structure
 
 ```text
 clipping-growth-os/
 ├── backend/                Java/Spring Boot application
+├── frontend/               React/TypeScript application
 ├── workers/media-worker/   Python/FastAPI processing service
 └── compose.yaml            Local PostgreSQL infrastructure
 ```
@@ -85,6 +86,34 @@ Run the worker tests with:
 
 ```powershell
 uv run pytest
+```
+
+## Frontend
+
+Prerequisites:
+
+- A Node.js version supported by `frontend/package.json`
+- npm
+
+From `frontend/`, install the locked dependencies and start the Vite development server:
+
+```powershell
+npm ci
+npm run dev
+```
+
+The frontend is available at:
+
+```text
+http://localhost:5173/
+```
+
+Run the frontend checks with:
+
+```powershell
+npm run typecheck
+npm test
+npm run build
 ```
 
 ## Build and test
