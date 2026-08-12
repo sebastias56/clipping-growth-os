@@ -2,7 +2,7 @@
 
 Clipping Growth OS is an incremental, production-oriented platform for turning long-form creator content into reviewable short-form clips.
 
-The repository currently contains the Stage 0 repository foundation, PostgreSQL persistence infrastructure, a local PostgreSQL development environment, the independent media worker foundation, and the frontend application foundation. Product domain features, media processing, distribution, and analytics are intentionally out of scope at this stage.
+The repository currently contains the Stage 0 foundation and the Stage 0.9 cross-service status contract connecting the frontend, backend, and media worker. Product domain features, media processing, distribution, and analytics are intentionally out of scope at this stage.
 
 ## Repository structure
 
@@ -20,21 +20,53 @@ Prerequisites:
 
 - Java 25
 - Docker Desktop
+- Python 3.14 and `uv`
+- A Node.js version supported by `frontend/package.json` and npm
 - No system Maven installation is required; use the included Maven Wrapper.
 
-From the repository root, start PostgreSQL and then run the backend directly from Maven:
+Start the four local services in this order, using a separate terminal for each long-running process.
+
+1. From the repository root, start PostgreSQL:
 
 ```powershell
 docker compose up -d
+```
+
+2. Start the media worker on port 8001:
+
+```powershell
+cd workers/media-worker
+uv sync --locked
+uv run --locked uvicorn app.main:app --reload --port 8001
+```
+
+3. Start the backend on port 8080:
+
+```powershell
 cd backend
 .\mvnw.cmd spring-boot:run
 ```
 
-The Compose service exposes PostgreSQL only on `localhost:5432`. Once Spring Boot starts, verify it at:
+4. Start the frontend on port 5173:
+
+```powershell
+cd frontend
+npm ci
+npm run dev
+```
+
+The local endpoints are:
 
 ```text
-GET http://localhost:8080/actuator/health
+Frontend:                   http://localhost:5173/
+Backend infrastructure:    http://localhost:8080/actuator/health
+Backend application status: http://localhost:8080/api/system/status
+Media worker health:       http://localhost:8001/health
 ```
+
+Application clients communicate with the media worker through Spring Boot. The browser uses the backend's `/api` contract and must not consume worker endpoints directly; Vite proxies `/api` to `http://localhost:8080` during local development.
+
+The Compose service exposes PostgreSQL only on `localhost:5432`.
 
 Stop the local database without deleting its data:
 
@@ -72,8 +104,8 @@ Prerequisites:
 From `workers/media-worker/`, install the locked dependencies and start the development server on a port separate from Spring Boot:
 
 ```powershell
-uv sync
-uv run uvicorn app.main:app --reload --port 8001
+uv sync --locked
+uv run --locked uvicorn app.main:app --reload --port 8001
 ```
 
 Verify the worker at:
@@ -85,7 +117,7 @@ GET http://localhost:8001/health
 Run the worker tests with:
 
 ```powershell
-uv run pytest
+uv run --locked pytest
 ```
 
 ## Frontend

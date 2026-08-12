@@ -9,6 +9,7 @@ Build incrementally. Implement only the explicitly requested stage and do not sc
 ## Architectural boundaries
 
 - Use a monorepo with a modular-monolith Java backend and a separate media/AI worker only when that worker is requested.
+- Preserve the communication topology Frontend -> Spring Boot -> Media Worker. The browser must never call the worker directly; Spring Boot is the public API boundary and orchestration layer.
 - Java owns domain state, orchestration, persistence, and processing-job lifecycle.
 - A future Python worker owns media and AI processing, not business state. Communicate through explicit service contracts; never launch Python from Spring with `Runtime.exec` or an equivalent.
 - PostgreSQL will be the source of truth for structured data. Never store media binaries in PostgreSQL.

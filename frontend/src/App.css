@@ -31,10 +31,50 @@
   line-height: 1.1;
 }
 
-.foundation-status {
+.system-summary {
   margin: 1.5rem 0 0;
   color: #334155;
   font-size: 1.125rem;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0 0;
+}
+
+.status-grid > div {
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  background: #f8fafc;
+}
+
+.status-grid dt {
+  color: #475569;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.status-grid dd {
+  margin: 0.5rem 0 0;
+  color: #64748b;
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.status-grid dd[data-status="UP"] {
+  color: #15803d;
+}
+
+.status-grid dd[data-status="DOWN"] {
+  color: #b91c1c;
+}
+
+.status-message {
+  margin: 1.5rem 0 0;
+  color: #475569;
 }
 
 .home-link {
@@ -42,4 +82,10 @@
   margin-top: 1.5rem;
   color: #1d4ed8;
   font-weight: 600;
+}
+
+@media (max-width: 32rem) {
+  .status-grid {
+    grid-template-columns: 1fr;
+  }
 }
