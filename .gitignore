@@ -1,6 +1,12 @@
 # Maven build output
 **/target/
 
+# Python generated artifacts
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+
 # Java and IDE metadata
 *.class
 *.iml

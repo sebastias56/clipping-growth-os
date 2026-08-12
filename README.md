@@ -2,14 +2,15 @@
 
 Clipping Growth OS is an incremental, production-oriented platform for turning long-form creator content into reviewable short-form clips.
 
-The repository currently contains the Stage 0 repository foundation, PostgreSQL persistence infrastructure, and a local PostgreSQL development environment. Product domain features, media processing, frontend code, distribution, and analytics are intentionally out of scope at this stage.
+The repository currently contains the Stage 0 repository foundation, PostgreSQL persistence infrastructure, a local PostgreSQL development environment, and the independent media worker foundation. Product domain features, media processing, frontend code, distribution, and analytics are intentionally out of scope at this stage.
 
 ## Repository structure
 
 ```text
 clipping-growth-os/
-├── backend/       Java/Spring Boot application
-└── compose.yaml   Local PostgreSQL infrastructure
+├── backend/                Java/Spring Boot application
+├── workers/media-worker/   Python/FastAPI processing service
+└── compose.yaml            Local PostgreSQL infrastructure
 ```
 
 ## Local development
@@ -59,6 +60,32 @@ The root `.env.example` documents these values. Spring Boot does not load that f
 Flyway owns schema evolution. Hibernate schema generation is disabled because the project does not have mapped domain entities yet.
 
 The Compose PostgreSQL data is stored in a named volume, so it survives container restarts and recreation unless the volume is explicitly removed.
+
+## Media worker
+
+Prerequisites:
+
+- Python 3.14
+- `uv`
+
+From `workers/media-worker/`, install the locked dependencies and start the development server on a port separate from Spring Boot:
+
+```powershell
+uv sync
+uv run uvicorn app.main:app --reload --port 8001
+```
+
+Verify the worker at:
+
+```text
+GET http://localhost:8001/health
+```
+
+Run the worker tests with:
+
+```powershell
+uv run pytest
+```
 
 ## Build and test
 
