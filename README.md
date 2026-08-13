@@ -2,7 +2,7 @@
 
 Clipping Growth OS is an incremental, production-oriented platform for turning long-form creator content into reviewable short-form clips.
 
-The repository currently contains the Stage 0 foundation and the Stage 0.9 cross-service status contract connecting the frontend, backend, and media worker. Product domain features, media processing, distribution, and analytics are intentionally out of scope at this stage.
+The repository contains the completed Stage 0 technical foundation: a React frontend, a Spring Boot application boundary with PostgreSQL persistence, a FastAPI media worker, the cross-service status contract, locked quality tooling, and CI. Product-domain implementation starts after this baseline; media processing, distribution, and analytics are intentionally absent.
 
 ## Repository structure
 
@@ -21,7 +21,7 @@ Prerequisites:
 - Java 25
 - Docker Desktop
 - Python 3.14 and `uv`
-- A Node.js version supported by `frontend/package.json` and npm
+- Node.js 24 (the CI reference runtime; `frontend/package.json` defines the precise supported range) and npm
 - No system Maven installation is required; use the included Maven Wrapper.
 
 Start the four local services in this order, using a separate terminal for each long-running process.
@@ -80,15 +80,16 @@ To intentionally reset the local database and delete the named volume, run:
 docker compose down -v
 ```
 
-## Database configuration
+## Backend configuration
 
-The backend reads its PostgreSQL connection from Spring Boot's normal environment-backed configuration:
+The backend reads its PostgreSQL connection and media-worker location from Spring Boot's normal environment-backed configuration:
 
 - `DB_URL` (local default: `jdbc:postgresql://localhost:5432/clipping_growth`)
 - `DB_USERNAME` (local default: `clipping_growth`)
 - `DB_PASSWORD` (local default: `clipping_growth`)
+- `MEDIA_WORKER_BASE_URL` (local default: `http://localhost:8001`)
 
-The root `.env.example` documents these values. Spring Boot does not load that file automatically; export the variables in your shell or configure them through your development environment.
+The root `.env.example` documents these values. Spring Boot does not load that file automatically; export the variables in your shell or configure them through your development environment. Worker requests use a one-second connection timeout and a two-second read timeout, as configured in `backend/src/main/resources/application.properties`.
 
 Flyway owns schema evolution. Hibernate schema generation is disabled because the project does not have mapped domain entities yet.
 
@@ -118,7 +119,7 @@ GET http://localhost:8001/health
 
 Prerequisites:
 
-- A Node.js version supported by `frontend/package.json`
+- Node.js 24 (the CI reference runtime; `frontend/package.json` defines the precise supported range)
 - npm
 
 From `frontend/`, install the locked dependencies and start the Vite development server:
