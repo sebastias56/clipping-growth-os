@@ -33,4 +33,9 @@ public class CreatorService {
     public Optional<CreatorResponse> findById(UUID creatorId) {
         return creatorRepository.findById(creatorId).map(CreatorResponse::from);
     }
+
+    @Transactional(readOnly = true)
+    public boolean existsById(UUID creatorId) {
+        return creatorRepository.existsById(creatorId);
+    }
 }
