@@ -51,6 +51,7 @@ class CreatorControllerIntegrationTests {
     @BeforeEach
     void setUp() {
         mockMvc = webAppContextSetup(applicationContext).build();
+        jdbcTemplate.update("DELETE FROM source_videos");
         jdbcTemplate.update("DELETE FROM creators");
     }
 

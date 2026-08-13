@@ -4,7 +4,7 @@
 
 Clipping Growth OS will eventually turn long-form creator content into short-form clips through transcription, moment detection, clip generation, subtitles, variants, human review, and export. The MVP stops at human review and export; automatic publishing, analytics, experiments, and multi-account SaaS capabilities are later work.
 
-Build incrementally. Implement only the explicitly requested stage and do not scaffold future features. The current product-domain scope contains only the Creator create/list/get vertical slice; no later business/domain models are implemented.
+Build incrementally. Implement only the explicitly requested stage and do not scaffold future features. The current product-domain scope contains Creator create/list/get functionality and SourceVideo create/list-by-Creator/get functionality; no later business/domain models are implemented.
 
 ## Architectural boundaries
 
