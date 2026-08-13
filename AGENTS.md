@@ -25,6 +25,7 @@ Build incrementally. Implement only the explicitly requested stage and do not sc
 - Never commit secrets. Add `.env.example` when environment variables are introduced.
 - Add meaningful tests for behavior; do not chase arbitrary coverage.
 - Every change must compile, pass relevant tests, and package successfully.
+- Keep local quality commands aligned with CI; pull requests must keep the `Backend`, `Media Worker`, and `Frontend` jobs green.
 - Review the final diff for accidental or unnecessary changes.
 - Do not create commits unless the user explicitly asks.
 
