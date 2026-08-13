@@ -165,3 +165,7 @@ npm run build
 On macOS or Linux, use `./mvnw` for the backend commands.
 
 The tests start an isolated PostgreSQL 18 container and do not use a developer-installed PostgreSQL instance.
+
+## Continuous integration
+
+Pull requests targeting `main` and pushes to `main` run the backend, media-worker, and frontend quality gates as independent jobs in `.github/workflows/ci.yml`.
