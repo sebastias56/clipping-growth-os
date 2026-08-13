@@ -1,6 +1,12 @@
 package com.clippinggrowth;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
+
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import jakarta.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.Test;
@@ -48,10 +54,39 @@ class ClippingGrowthApplicationTests {
         Long recordedMigrations = jdbcTemplate.queryForObject("""
                 SELECT COUNT(*)
                 FROM flyway_schema_history
-                WHERE version = '1'
-                  AND script = 'V1__initialize_schema.sql'
+                WHERE ((version = '1' AND script = 'V1__initialize_schema.sql')
+                    OR (version = '2' AND script = 'V2__create_creators.sql'))
                   AND success
                 """, Long.class);
-        assertThat(recordedMigrations).isEqualTo(1L);
+        assertThat(recordedMigrations).isEqualTo(2L);
+    }
+
+    @Test
+    void creatorMigrationCreatesExpectedPostgreSqlStructureAndBlankNameConstraint() {
+        List<Map<String, Object>> columns = jdbcTemplate.queryForList("""
+                SELECT column_name, data_type, character_maximum_length, is_nullable
+                FROM information_schema.columns
+                WHERE table_schema = 'public'
+                  AND table_name = 'creators'
+                ORDER BY ordinal_position
+                """);
+
+        assertThat(columns)
+                .extracting(
+                        column -> column.get("column_name"),
+                        column -> column.get("data_type"),
+                        column -> column.get("character_maximum_length"),
+                        column -> column.get("is_nullable"))
+                .containsExactly(
+                        tuple("id", "uuid", null, "NO"),
+                        tuple("name", "character varying", 120, "NO"),
+                        tuple("created_at", "timestamp with time zone", null, "NO"),
+                        tuple("updated_at", "timestamp with time zone", null, "NO"));
+
+        assertThatThrownBy(() -> jdbcTemplate.update("""
+                INSERT INTO creators (id, name, created_at, updated_at)
+                VALUES (?, E' \t ', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                """, UUID.randomUUID()))
+                .hasMessageContaining("creators_name_not_blank");
     }
 }

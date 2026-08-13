@@ -4,7 +4,7 @@
 
 Clipping Growth OS will eventually turn long-form creator content into short-form clips through transcription, moment detection, clip generation, subtitles, variants, human review, and export. The MVP stops at human review and export; automatic publishing, analytics, experiments, and multi-account SaaS capabilities are later work.
 
-Build incrementally. Implement only the explicitly requested stage and do not scaffold future features. The current repository contains the Stage 0 foundation and PostgreSQL persistence infrastructure, but no business/domain model.
+Build incrementally. Implement only the explicitly requested stage and do not scaffold future features. The current product-domain scope contains only the Creator create/list/get vertical slice; no later business/domain models are implemented.
 
 ## Architectural boundaries
 
@@ -51,6 +51,6 @@ Build incrementally. Implement only the explicitly requested stage and do not sc
 - PostgreSQL 18 is the target database.
 - Runtime connection settings come from `DB_URL`, `DB_USERNAME`, and `DB_PASSWORD` through Spring Boot configuration.
 - Flyway exclusively owns schema evolution; Hibernate schema generation must remain disabled.
-- Do not create JPA entities or repositories until an explicit domain stage requires them.
+- Create JPA entities and repositories only for explicitly requested domain stages.
 - Persistence integration tests use a PostgreSQL 18 Testcontainer and must not fall back to H2, mocks, or a locally installed database.
 - The root `compose.yaml` provides PostgreSQL 18 only for local development; run the backend directly from Maven or the IDE unless containerization is explicitly requested.

@@ -56,6 +56,9 @@ function App() {
           </div>
         </dl>
         <p className="status-message">{statusView.message}</p>
+        <Link className="home-link" to="/creators">
+          Manage creators
+        </Link>
       </section>
     </main>
   )

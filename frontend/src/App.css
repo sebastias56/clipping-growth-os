@@ -84,8 +84,154 @@
   font-weight: 600;
 }
 
+.creator-shell {
+  min-height: 100vh;
+  padding: clamp(1.25rem, 5vw, 4rem);
+}
+
+.creator-card {
+  width: min(100%, 54rem);
+  margin: 0 auto;
+  padding: clamp(1.5rem, 5vw, 3rem);
+  border: 1px solid #d9e0e8;
+  border-radius: 1rem;
+  background: #ffffff;
+  box-shadow: 0 1rem 3rem rgba(30, 41, 59, 0.08);
+}
+
+.creator-card h1 {
+  margin: 0;
+  color: #0f172a;
+  font-size: clamp(2rem, 7vw, 3rem);
+  line-height: 1.1;
+}
+
+.creator-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.text-link,
+.creator-list a {
+  color: #1d4ed8;
+  font-weight: 650;
+}
+
+.creator-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+.creator-form-field {
+  display: grid;
+  gap: 0.5rem;
+  color: #334155;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.creator-form input {
+  width: 100%;
+  padding: 0.75rem 0.875rem;
+  border: 1px solid #94a3b8;
+  border-radius: 0.5rem;
+  color: #0f172a;
+  background: #ffffff;
+  font: inherit;
+}
+
+.creator-form input:focus {
+  border-color: #2563eb;
+  outline: 3px solid rgba(37, 99, 235, 0.18);
+}
+
+.creator-form button {
+  padding: 0.75rem 1rem;
+  border: 1px solid #1d4ed8;
+  border-radius: 0.5rem;
+  color: #ffffff;
+  background: #1d4ed8;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.creator-form button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.form-error,
+.page-error {
+  color: #b91c1c;
+}
+
+.creator-results {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.empty-state,
+.creator-results > p {
+  margin: 0;
+  color: #475569;
+}
+
+.creator-list {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.creator-list li {
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  background: #f8fafc;
+}
+
+.creator-detail {
+  min-height: 18rem;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 2rem;
+}
+
+.creator-metadata {
+  margin: 2rem 0 0;
+}
+
+.creator-metadata dt {
+  color: #64748b;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.creator-metadata dd {
+  margin: 0.35rem 0 0;
+  color: #334155;
+}
+
 @media (max-width: 32rem) {
   .status-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .creator-header {
+    display: grid;
+  }
+
+  .creator-form {
     grid-template-columns: 1fr;
   }
 }

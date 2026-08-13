@@ -2,7 +2,7 @@
 
 Clipping Growth OS is an incremental, production-oriented platform for turning long-form creator content into reviewable short-form clips.
 
-The repository contains the completed Stage 0 technical foundation: a React frontend, a Spring Boot application boundary with PostgreSQL persistence, a FastAPI media worker, the cross-service status contract, locked quality tooling, and CI. Product-domain implementation starts after this baseline; media processing, distribution, and analytics are intentionally absent.
+The repository contains the technical foundation plus the first product vertical slice: a React frontend, a Spring Boot application boundary, PostgreSQL persistence for Creators, a FastAPI media worker, the cross-service status contract, locked quality tooling, and CI. Creators can be created, listed, and retrieved individually; media processing, distribution, and analytics are intentionally absent.
 
 ## Repository structure
 
@@ -59,8 +59,10 @@ The local endpoints are:
 
 ```text
 Frontend:                   http://localhost:5173/
+Frontend creators:          http://localhost:5173/creators
 Backend infrastructure:    http://localhost:8080/actuator/health
 Backend application status: http://localhost:8080/api/system/status
+Backend creators:           http://localhost:8080/api/creators
 Media worker health:       http://localhost:8001/health
 ```
 
@@ -91,7 +93,7 @@ The backend reads its PostgreSQL connection and media-worker location from Sprin
 
 The root `.env.example` documents these values. Spring Boot does not load that file automatically; export the variables in your shell or configure them through your development environment. Worker requests use a one-second connection timeout and a two-second read timeout, as configured in `backend/src/main/resources/application.properties`.
 
-Flyway owns schema evolution. Hibernate schema generation is disabled because the project does not have mapped domain entities yet.
+Flyway owns schema evolution. Hibernate schema generation remains disabled so database migrations are the exclusive source of schema changes.
 
 The Compose PostgreSQL data is stored in a named volume, so it survives container restarts and recreation unless the volume is explicitly removed.
 
