@@ -1,8 +1,8 @@
 # Clipping Growth OS
 
-Clipping Growth OS is an incremental, production-oriented platform for turning long-form creator content into reviewable short-form clips.
+Clipping Growth OS is an incremental, production-oriented platform whose implemented scope currently catalogs Creators and their SourceVideos.
 
-The repository contains the technical foundation plus the first product vertical slices: a React frontend, a Spring Boot application boundary, PostgreSQL persistence for Creators and their SourceVideos, a FastAPI media worker, the cross-service status contract, locked quality tooling, and CI. Creators can be created, listed, and retrieved individually. The backend can also create SourceVideos under a Creator, list them with pagination, and retrieve them individually; the SourceVideo frontend workspace, media processing, distribution, and analytics are intentionally absent.
+The repository contains the technical foundation plus the first product vertical slices: a React frontend, a Spring Boot application boundary, PostgreSQL persistence for Creators and their SourceVideos, a FastAPI media worker, the cross-service status contract, locked quality tooling, and CI. The React content workspace supports creating and browsing Creators, creating and paging through each Creator's SourceVideos, and opening individual SourceVideo details. Media processing, distribution, and analytics are intentionally absent.
 
 ## Repository structure
 
@@ -60,6 +60,7 @@ The local endpoints are:
 ```text
 Frontend:                   http://localhost:5173/
 Frontend creators:          http://localhost:5173/creators
+Frontend SourceVideo:       http://localhost:5173/source-videos/{sourceVideoId}
 Backend infrastructure:    http://localhost:8080/actuator/health
 Backend application status: http://localhost:8080/api/system/status
 Backend creators:           http://localhost:8080/api/creators

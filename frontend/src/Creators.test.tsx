@@ -164,7 +164,24 @@ describe('Creators page', () => {
 
 describe('Creator detail page', () => {
   it('shows the Creator and created timestamp', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse(creator)))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        if (String(input).includes('/source-videos?')) {
+          return Promise.resolve(
+            jsonResponse({
+              items: [],
+              page: 0,
+              size: 30,
+              totalElements: 0,
+              totalPages: 0,
+            }),
+          )
+        }
+
+        return Promise.resolve(jsonResponse(creator))
+      }),
+    )
 
     renderAt(`/creators/${creator.id}`)
 
@@ -172,6 +189,9 @@ describe('Creator detail page', () => {
     const createdTime = document.querySelector('time')
     expect(createdTime?.getAttribute('datetime')).toBe(creator.createdAt)
     expect(screen.getByRole('link', { name: '← Back to Creators' })).toBeTruthy()
+    expect(
+      await screen.findByRole('heading', { name: 'Source Videos' }),
+    ).toBeTruthy()
   })
 
   it('shows the not-found state for a missing Creator', async () => {
