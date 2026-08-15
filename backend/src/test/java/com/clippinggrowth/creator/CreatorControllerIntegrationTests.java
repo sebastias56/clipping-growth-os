@@ -2,6 +2,7 @@ package com.clippinggrowth.creator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -30,6 +31,7 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.context.WebApplicationContext;
 
 @Testcontainers
@@ -82,10 +84,11 @@ class CreatorControllerIntegrationTests {
     @ParameterizedTest
     @MethodSource("invalidBlankNames")
     void rejectsMissingNullEmptyAndBlankNames(String requestBody) throws Exception {
-        mockMvc.perform(post("/api/creators")
+        expectInvalidRequest(
+                mockMvc.perform(post("/api/creators")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
-                .andExpect(status().isBadRequest());
+                        .content(requestBody)),
+                "Name is required");
 
         assertThat(countCreators()).isZero();
     }
@@ -102,12 +105,31 @@ class CreatorControllerIntegrationTests {
     void rejectsNameLongerThan120Characters() throws Exception {
         String oversizedName = "a".repeat(121);
 
-        mockMvc.perform(post("/api/creators")
+        expectInvalidRequest(
+                mockMvc.perform(post("/api/creators")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"" + oversizedName + "\"}"))
-                .andExpect(status().isBadRequest());
+                        .content("{\"name\":\"" + oversizedName + "\"}")),
+                "Name must be at most 120 characters");
 
         assertThat(countCreators()).isZero();
+    }
+
+    @Test
+    void returnsProblemDetailForMalformedJson() throws Exception {
+        expectInvalidRequest(
+                mockMvc.perform(post("/api/creators")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":")),
+                "Request body is malformed");
+
+        assertThat(countCreators()).isZero();
+    }
+
+    @Test
+    void returnsProblemDetailForMalformedCreatorUuid() throws Exception {
+        expectInvalidRequest(
+                mockMvc.perform(get("/api/creators/not-a-uuid")),
+                "Invalid value for creatorId");
     }
 
     @Test
@@ -184,5 +206,21 @@ class CreatorControllerIntegrationTests {
 
     private long countCreators() {
         return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM creators", Long.class);
+    }
+
+    private ResultActions expectInvalidRequest(ResultActions result, String detail)
+            throws Exception {
+        return result
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.title").value("Invalid request"))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.detail").value(detail))
+                .andExpect(jsonPath("$.trace").doesNotExist())
+                .andExpect(jsonPath("$.stackTrace").doesNotExist())
+                .andExpect(content().string(not(containsString("Exception"))))
+                .andExpect(content().string(not(containsString("org.springframework"))))
+                .andExpect(content().string(not(containsString("tools.jackson"))))
+                .andExpect(content().string(not(containsString("com.clippinggrowth"))));
     }
 }
