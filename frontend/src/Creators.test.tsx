@@ -142,12 +142,12 @@ describe('Creators page', () => {
     ).toBeTruthy()
   })
 
-  it('shows a create failure returned by the backend', async () => {
+  it('shows a validation detail returned by the backend', async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(jsonResponse([]))
       .mockResolvedValueOnce(
-        jsonResponse({ detail: 'Creator could not be saved.' }, 500),
+        jsonResponse({ detail: 'Name is required' }, 400),
       )
     vi.stubGlobal('fetch', fetchMock)
     renderAt('/creators')
@@ -158,7 +158,7 @@ describe('Creators page', () => {
     })
     fireEvent.click(screen.getByRole('button', { name: 'Add Creator' }))
 
-    expect(await screen.findByText('Creator could not be saved.')).toBeTruthy()
+    expect(await screen.findByText('Name is required')).toBeTruthy()
   })
 })
 

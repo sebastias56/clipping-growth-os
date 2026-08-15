@@ -197,13 +197,19 @@ describe('Creator Source Videos workspace', () => {
     expect(fetchMock).toHaveBeenCalledTimes(2)
   })
 
-  it('shows a backend creation failure without losing the form values', async () => {
+  it('shows a backend validation detail without losing the form values', async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(jsonResponse(creator))
       .mockResolvedValueOnce(jsonResponse(sourceVideoPage([])))
       .mockResolvedValueOnce(
-        jsonResponse({ detail: 'Source Video could not be saved.' }, 500),
+        jsonResponse(
+          {
+            detail:
+              'Origin URL must be an absolute HTTP or HTTPS URL with a valid host',
+          },
+          400,
+        ),
       )
     vi.stubGlobal('fetch', fetchMock)
     renderAt(`/creators/${creator.id}`)
@@ -214,7 +220,9 @@ describe('Creator Source Videos workspace', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Add Source Video' }))
 
     expect(
-      await screen.findByText('Source Video could not be saved.'),
+      await screen.findByText(
+        'Origin URL must be an absolute HTTP or HTTPS URL with a valid host',
+      ),
     ).toBeTruthy()
     expect((titleInput as HTMLInputElement).value).toBe('Interview')
   })

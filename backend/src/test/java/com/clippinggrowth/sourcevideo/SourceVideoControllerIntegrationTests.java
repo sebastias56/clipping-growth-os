@@ -2,6 +2,7 @@ package com.clippinggrowth.sourcevideo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -32,6 +33,7 @@ import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.context.WebApplicationContext;
 
 @Testcontainers
@@ -150,10 +152,11 @@ class SourceVideoControllerIntegrationTests {
         UUID creatorId = UUID.randomUUID();
         insertCreator(creatorId, "Creator");
 
-        mockMvc.perform(post("/api/creators/{creatorId}/source-videos", creatorId)
+        expectInvalidRequest(
+                mockMvc.perform(post("/api/creators/{creatorId}/source-videos", creatorId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
-                .andExpect(status().isBadRequest());
+                        .content(requestBody)),
+                "Title is required");
 
         assertThat(countSourceVideos()).isZero();
     }
@@ -171,10 +174,11 @@ class SourceVideoControllerIntegrationTests {
         UUID creatorId = UUID.randomUUID();
         insertCreator(creatorId, "Creator");
 
-        mockMvc.perform(post("/api/creators/{creatorId}/source-videos", creatorId)
+        expectInvalidRequest(
+                mockMvc.perform(post("/api/creators/{creatorId}/source-videos", creatorId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"title\":\"" + "a".repeat(301) + "\"}"))
-                .andExpect(status().isBadRequest());
+                        .content("{\"title\":\"" + "a".repeat(301) + "\"}")),
+                "Title must be at most 300 characters");
 
         assertThat(countSourceVideos()).isZero();
     }
@@ -185,11 +189,12 @@ class SourceVideoControllerIntegrationTests {
         insertCreator(creatorId, "Creator");
         String oversizedUrl = "https://example.com/" + "a".repeat(2049);
 
-        mockMvc.perform(post("/api/creators/{creatorId}/source-videos", creatorId)
+        expectInvalidRequest(
+                mockMvc.perform(post("/api/creators/{creatorId}/source-videos", creatorId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"title\":\"Oversized URL\",\"originUrl\":\""
-                                + oversizedUrl + "\"}"))
-                .andExpect(status().isBadRequest());
+                                + oversizedUrl + "\"}")),
+                "Origin URL must be at most 2048 characters");
 
         assertThat(countSourceVideos()).isZero();
     }
@@ -200,11 +205,12 @@ class SourceVideoControllerIntegrationTests {
         UUID creatorId = UUID.randomUUID();
         insertCreator(creatorId, "Creator");
 
-        mockMvc.perform(post("/api/creators/{creatorId}/source-videos", creatorId)
+        expectInvalidRequest(
+                mockMvc.perform(post("/api/creators/{creatorId}/source-videos", creatorId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"title\":\"Invalid URL\",\"originUrl\":\""
-                                + originUrl + "\"}"))
-                .andExpect(status().isBadRequest());
+                                + originUrl + "\"}")),
+                "Origin URL must be an absolute HTTP or HTTPS URL with a valid host");
 
         assertThat(countSourceVideos()).isZero();
     }
@@ -216,6 +222,36 @@ class SourceVideoControllerIntegrationTests {
                 Arguments.of("ftp://example.com/video"),
                 Arguments.of("https:/video"),
                 Arguments.of("http://[broken"));
+    }
+
+    @Test
+    void returnsProblemDetailForMalformedJson() throws Exception {
+        UUID creatorId = UUID.randomUUID();
+        insertCreator(creatorId, "Creator");
+
+        expectInvalidRequest(
+                mockMvc.perform(post("/api/creators/{creatorId}/source-videos", creatorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"title\":")),
+                "Request body is malformed");
+
+        assertThat(countSourceVideos()).isZero();
+    }
+
+    @Test
+    void returnsProblemDetailForMalformedCreatorUuidInNestedEndpoint() throws Exception {
+        expectInvalidRequest(
+                mockMvc.perform(post("/api/creators/not-a-uuid/source-videos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"title\":\"Interview\"}")),
+                "Invalid value for creatorId");
+    }
+
+    @Test
+    void returnsProblemDetailForMalformedSourceVideoUuid() throws Exception {
+        expectInvalidRequest(
+                mockMvc.perform(get("/api/source-videos/not-a-uuid")),
+                "Invalid value for sourceVideoId");
     }
 
     @Test
@@ -391,21 +427,24 @@ class SourceVideoControllerIntegrationTests {
 
     @ParameterizedTest
     @MethodSource("invalidPagination")
-    void rejectsInvalidPagination(String page, String size) throws Exception {
+    void rejectsInvalidPagination(String page, String size, String detail) throws Exception {
         UUID creatorId = UUID.randomUUID();
         insertCreator(creatorId, "Creator");
 
-        mockMvc.perform(get("/api/creators/{creatorId}/source-videos", creatorId)
+        expectInvalidRequest(
+                mockMvc.perform(get("/api/creators/{creatorId}/source-videos", creatorId)
                         .queryParam("page", page)
-                        .queryParam("size", size))
-                .andExpect(status().isBadRequest());
+                        .queryParam("size", size)),
+                detail);
     }
 
     static Stream<Arguments> invalidPagination() {
         return Stream.of(
-                Arguments.of("-1", "30"),
-                Arguments.of("0", "0"),
-                Arguments.of("0", "101"));
+                Arguments.of("-1", "30", "Page must be at least 0"),
+                Arguments.of("0", "0", "Size must be at least 1"),
+                Arguments.of("0", "101", "Size must be at most 100"),
+                Arguments.of("abc", "30", "Invalid value for page"),
+                Arguments.of("0", "abc", "Invalid value for size"));
     }
 
     @Test
@@ -468,5 +507,21 @@ class SourceVideoControllerIntegrationTests {
 
     private long countSourceVideos() {
         return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM source_videos", Long.class);
+    }
+
+    private ResultActions expectInvalidRequest(ResultActions result, String detail)
+            throws Exception {
+        return result
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.title").value("Invalid request"))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.detail").value(detail))
+                .andExpect(jsonPath("$.trace").doesNotExist())
+                .andExpect(jsonPath("$.stackTrace").doesNotExist())
+                .andExpect(content().string(not(containsString("Exception"))))
+                .andExpect(content().string(not(containsString("org.springframework"))))
+                .andExpect(content().string(not(containsString("tools.jackson"))))
+                .andExpect(content().string(not(containsString("com.clippinggrowth"))));
     }
 }

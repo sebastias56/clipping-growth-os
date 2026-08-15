@@ -44,8 +44,11 @@ public class SourceVideoController {
     @GetMapping("/creators/{creatorId}/source-videos")
     public ResponseEntity<?> findAllByCreatorId(
             @PathVariable UUID creatorId,
-            @RequestParam(defaultValue = "0") @Min(0) int page,
-            @RequestParam(defaultValue = "30") @Min(1) @Max(100) int size) {
+            @RequestParam(defaultValue = "0")
+            @Min(value = 0, message = "Page must be at least 0") int page,
+            @RequestParam(defaultValue = "30")
+            @Min(value = 1, message = "Size must be at least 1")
+            @Max(value = 100, message = "Size must be at most 100") int size) {
         return sourceVideoService.findAllByCreatorId(creatorId, page, size)
                 .<ResponseEntity<?>>map(ResponseEntity::ok)
                 .orElseGet(() -> creatorNotFound(creatorId));
