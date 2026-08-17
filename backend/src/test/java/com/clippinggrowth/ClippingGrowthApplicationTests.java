@@ -36,6 +36,7 @@ class ClippingGrowthApplicationTests {
 
     @BeforeEach
     void setUp() {
+        jdbcTemplate.update("DELETE FROM media_assets");
         jdbcTemplate.update("DELETE FROM source_videos");
         jdbcTemplate.update("DELETE FROM creators");
     }
@@ -63,10 +64,11 @@ class ClippingGrowthApplicationTests {
                 FROM flyway_schema_history
                 WHERE ((version = '1' AND script = 'V1__initialize_schema.sql')
                     OR (version = '2' AND script = 'V2__create_creators.sql')
-                    OR (version = '3' AND script = 'V3__create_source_videos.sql'))
+                    OR (version = '3' AND script = 'V3__create_source_videos.sql')
+                    OR (version = '4' AND script = 'V4__create_media_assets.sql'))
                   AND success
                 """, Long.class);
-        assertThat(recordedMigrations).isEqualTo(3L);
+        assertThat(recordedMigrations).isEqualTo(4L);
     }
 
     @Test

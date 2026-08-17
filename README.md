@@ -87,14 +87,17 @@ docker compose down -v
 
 ## Backend configuration
 
-The backend reads its PostgreSQL connection and media-worker location from Spring Boot's normal environment-backed configuration:
+The backend reads its PostgreSQL connection, media-worker location, and local media storage root from Spring Boot's normal environment-backed configuration:
 
 - `DB_URL` (local default: `jdbc:postgresql://localhost:5432/clipping_growth`)
 - `DB_USERNAME` (local default: `clipping_growth`)
 - `DB_PASSWORD` (local default: `clipping_growth`)
 - `MEDIA_WORKER_BASE_URL` (local default: `http://localhost:8001`)
+- `MEDIA_STORAGE_ROOT` (local default: `${user.home}/.clipping-growth-os/media`)
 
 The root `.env.example` documents these values. Spring Boot does not load that file automatically; export the variables in your shell or configure them through your development environment. Worker requests use a one-second connection timeout and a two-second read timeout, as configured in `backend/src/main/resources/application.properties`.
+
+Local media objects are stored beneath `MEDIA_STORAGE_ROOT` in a controlled `media-assets/` hierarchy. The default is outside the repository, and the storage root must not be exposed as a web static directory. Each temporary object is written completely before create-only finalization; an existing final object is not replaced, and failed finalization cleans the temporary object. This does not claim provider-independent atomic publication. Local storage assumes a single backend writer and does not coordinate writers across application instances.
 
 Flyway owns schema evolution. Hibernate schema generation remains disabled so database migrations are the exclusive source of schema changes.
 
